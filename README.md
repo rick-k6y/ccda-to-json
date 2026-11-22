@@ -66,5 +66,5 @@ applicable terms.
 To process every XML file in `examples/` and write one compact JSON object per line:
 
 ```bash
-find ./examples -name '\*.xml' -exec ./extract\_patient.sh {} \\; |
+find ./examples -name '\*.xml' -exec ./extract\_patient.sh {} \; |
   jq -c '.' > examples.jsonl
