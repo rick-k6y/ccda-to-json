@@ -67,17 +67,16 @@ def primary_phone:
     )
   | first // "Unknown";
 
-.ClinicalDocument.recordTarget.patientRole as $role
-| $role.patient
+.ClinicalDocument.recordTarget.patientRole
 | {
-    first_name: (.name.given | xmltext | propercase),
-    last_name: (.name.family | xmltext | propercase),
-    dob: (.birthTime["@value"] | dateparse),
+    first_name: (.patient.name.given | xmltext | propercase),
+    last_name: (.patient.name.family | xmltext | propercase),
+    dob: (.patient.birthTime["@value"] | dateparse),
     gender: (
-      .administrativeGenderCode["@displayName"]
-      // .administrativeGenderCode["@code"]
+      .patient.administrativeGenderCode["@displayName"]
+      // .patient.administrativeGenderCode["@code"]
       | canonical_gender
     ),
-    primary_phone: ($role.telecom | primary_phone)
+    primary_phone: (.telecom | primary_phone)
   }
 ' "$INPUT_FILE"
