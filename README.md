@@ -68,3 +68,4 @@ To process every XML file in `examples/` and write one compact JSON object per l
 ```bash
 find ./examples -name '\*.xml' -exec ./extract\_patient.sh {} \; |
   jq -c '.' > examples.jsonl
+```
