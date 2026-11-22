@@ -65,7 +65,15 @@ def primary_phone:
         (match("\\+?\\(?[0-9][0-9(). -]*[0-9]") | .string)
       catch ""
     )
-  | first // "Unknown";
+  | map(select(length > 0))
+  | (first // "Unknown") as $raw
+  | ($raw | gsub("[^0-9]"; "")) as $digits
+  | if ($digits | length) == 10 then
+      "(" + $digits[0:3] + ") " + $digits[3:6] + "-" + $digits[6:10]
+    elif ($digits | length) == 11 and ($digits | startswith("1")) then
+      "(" + $digits[1:4] + ") " + $digits[4:7] + "-" + $digits[7:11]
+    else $raw
+    end;
 
 .ClinicalDocument.recordTarget.patientRole
 | {
