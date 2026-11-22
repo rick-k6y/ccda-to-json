@@ -27,14 +27,32 @@ def xmltext:
 
 def dateparse:
   if . == null or . == "" then "Unknown"
-  else tostring as $d
-  | if ($d | test("^[0-9]{8}")) then $d[0:8]
-    elif ($d | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}")) then ($d[0:10] | gsub("-"; ""))
-    elif ($d | test("^[0-9]{4}/[0-9]{2}/[0-9]{2}")) then ($d[0:10] | gsub("/"; ""))
-    elif ($d | test("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$"))
-      then try ($d | strptime("%m/%d/%Y") | strftime("%Y%m%d")) catch "Unknown"
-    else "Unknown"
-    end
+  else
+    tostring as $raw
+    | if ($raw | test("^[0-9]{8}")) then
+        $raw[0:8]
+      elif ($raw | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}")) then
+        ($raw | match("^[0-9]{4}-[0-9]{2}-[0-9]{2}").string
+         | strptime("%Y-%m-%d") | strftime("%Y%m%d"))
+      elif ($raw | test("^[0-9]{4}/[0-9]{2}/[0-9]{2}")) then
+        ($raw | match("^[0-9]{4}/[0-9]{2}/[0-9]{2}").string
+         | strptime("%Y/%m/%d") | strftime("%Y%m%d"))
+      elif ($raw | test("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}")) then
+        ($raw | match("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}").string) as $date
+        | if ($date | split("/")[0] | tonumber) > 12 then
+            try ($date | strptime("%d/%m/%Y") | strftime("%Y%m%d")) catch "Unknown"
+          else
+            try ($date | strptime("%m/%d/%Y") | strftime("%Y%m%d")) catch "Unknown"
+          end
+      elif ($raw | test("^[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}")) then
+        ($raw | match("^[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}").string) as $date
+        | if ($date | split("-")[0] | tonumber) > 12 then
+            try ($date | strptime("%d-%m-%Y") | strftime("%Y%m%d")) catch "Unknown"
+          else
+            try ($date | strptime("%m-%d-%Y") | strftime("%Y%m%d")) catch "Unknown"
+          end
+      else "Unknown"
+      end
   end;
 
 def propercase:
