@@ -61,3 +61,10 @@ These files are included as test fixtures. The MIT license in this repository
 covers project code; sample files retain their upstream provenance and any
 applicable terms.
 
+## Batch extraction to JSON Lines
+
+To process every XML file in `examples/` and write one compact JSON object per line:
+
+```bash
+find ./examples -name '\*.xml' -exec ./extract\_patient.sh {} \\; |
+  jq -c '.' > examples.jsonl
